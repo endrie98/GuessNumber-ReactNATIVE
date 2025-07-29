@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
-import { Alert, FlatList, StyleSheet, View } from "react-native";
+import { Alert, FlatList, StyleSheet, View, useWindowDimensions } from "react-native";
 import GuessLogItem from "../components/game/GuessLogItem";
 import NumberContainer from "../components/game/NumberContainer";
 import Card from "../components/ui/Card";
@@ -24,7 +24,8 @@ let maxBoundary: number = 100;
 const GameScreen = ({ userNumber, setGameIsOver, setGuessRounts }: { userNumber: number; setGameIsOver: (state: boolean) => void; setGuessRounts: (num: number) => void; }) => {
   const initialGuess = generateRandomBetween(1, 100, userNumber);
   const [currentGuess, setCurrentGuess] = useState<number>(initialGuess);
-  const [guessNumbers, setGuessNumbers] = useState<number[]> ([initialGuess]);
+  const [guessNumbers, setGuessNumbers] = useState<number[]>([initialGuess]);
+  const { width, height } = useWindowDimensions();
 
   useEffect(() => {
     if (currentGuess === userNumber)
@@ -59,25 +60,48 @@ const GameScreen = ({ userNumber, setGameIsOver, setGuessRounts }: { userNumber:
     setGuessNumbers((prevNumbers) => ([newRandNumber, ...prevNumbers]))
   }
 
+  let content = <>
+    <NumberContainer>{currentGuess}</NumberContainer>
+    <Card>
+      <InstructionComponent styleProp={styles.instructionText}>Greater or Lower?</InstructionComponent>
+      <View style={styles.buttonsContainer}>
+        <View style={styles.buttonContainer}>
+          <PrimaryButton onPressHandler={() => handleGuessHandler("greater")}>
+            <Ionicons name="add" size={24} color="white" /> Greater
+          </PrimaryButton>
+        </View>
+        <View style={styles.buttonContainer}>
+          <PrimaryButton onPressHandler={() => handleGuessHandler("lower")}>
+            <Ionicons name="remove" size={24} color="white" /> Lower
+          </PrimaryButton>
+        </View>
+      </View>
+    </Card>
+  </>;
+
+  if (width > 500) {
+    content = <>
+      {/* <InstructionComponent styleProp={styles.instructionText}>Greater or Lower?</InstructionComponent> */}
+      <View style={styles.buttonContainerWide}>
+        <View style={styles.buttonContainer}>
+          <PrimaryButton onPressHandler={() => handleGuessHandler("greater")}>
+            <Ionicons name="add" size={24} color="white" /> Greater
+          </PrimaryButton>
+        </View>
+        <NumberContainer>{currentGuess}</NumberContainer>
+        <View style={styles.buttonContainer}>
+          <PrimaryButton onPressHandler={() => handleGuessHandler("lower")}>
+            <Ionicons name="remove" size={24} color="white" /> Lower
+          </PrimaryButton>
+        </View>
+      </View>
+    </>;
+  }
+
   return (
     <View style={styles.screen}>
       <Title text="Opponent's Guess" />
-      <NumberContainer>{currentGuess}</NumberContainer>
-      <Card>
-        <InstructionComponent styleProp={styles.instructionText}>Greater or Lower?</InstructionComponent>
-        <View style={styles.buttonsContainer}>
-          <View style={styles.buttonContainer}>
-            <PrimaryButton onPressHandler={() => handleGuessHandler("greater")}>
-              <Ionicons name="add" size={24} color="white" /> Greater
-            </PrimaryButton>
-          </View>
-          <View style={styles.buttonContainer}>
-            <PrimaryButton onPressHandler={() => handleGuessHandler("lower")}>
-              <Ionicons name="remove" size={24} color="white" /> Lower
-            </PrimaryButton>
-          </View>
-        </View>
-      </Card>
+      {content}
       <View style={styles.listContainer}>
         {/* {guessNumbers.map((number, index) => (<Text key={index}>{number}</Text>))} */}
         <FlatList data={guessNumbers} renderItem={(itemData) => <GuessLogItem guessNumber={itemData.item} numberRound={guessNumbers.length - itemData.index} />} keyExtractor={(_, index) => index.toString()} />
@@ -91,7 +115,8 @@ export default GameScreen
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    padding: 24
+    padding: 24,
+    alignItems: "center"
   },
   buttonsContainer: {
     flexDirection: "row"
@@ -105,5 +130,9 @@ const styles = StyleSheet.create({
   listContainer: {
     flex: 1,
     padding: 16
+  },
+  buttonContainerWide: {
+    flexDirection: "row",
+    alignItems: "center"
   }
 });

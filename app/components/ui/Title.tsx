@@ -1,22 +1,9 @@
-import { StyleSheet, Text } from "react-native";
+import { Platform } from 'react-native';
 
-const Title = ({ text }: { text: string; }) => {
-    return (
-        <Text style={styles.title}>{text}</Text>
-    )
-}
+const Title = Platform.select({
+  ios: () => require('./Title.ios').default,
+  android: () => require('./Title.android').default,
+  default: () => require('./Title.android').default, // fallback
+})();
 
-export default Title
-
-const styles = StyleSheet.create({
-  title: {
-    fontFamily: "open-sans-bold",
-    fontSize: 24,
-    // fontWeight: "bold",
-    color: "white",
-    textAlign: "center",
-    borderWidth: 2,
-    borderColor: "white",
-    padding: 12
-  }
-});
+export default Title;
